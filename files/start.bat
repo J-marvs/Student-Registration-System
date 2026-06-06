@@ -1,0 +1,1 @@
+"C:\Users\Nivra\AppData\Local\Programs\Python\Python314\python.exe" "C:\Users\Nivra\Downloads\files\app.py"

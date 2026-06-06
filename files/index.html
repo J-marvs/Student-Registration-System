@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Student Registration System</title>
+<link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+
+<header>
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
+  </svg>
+  <h1>Student Registration System</h1>
+  <span id="api-status">● Connecting…</span>
+</header>
+
+<nav>
+  <button class="active" onclick="showTab('students')">👤 Students</button>
+  <button onclick="showTab('enroll')">📋 Enrollments</button>
+  <button onclick="showTab('courses')">📚 Courses</button>
+  <button onclick="showTab('audit')">🗒️ Audit Log</button>
+</nav>
+
+<main>
+
+  <!-- ═══════════════ STUDENTS TAB ═══════════════ -->
+  <div id="tab-students">
+
+    <div class="card">
+      <div class="card-title">➕ Add / Edit Student</div>
+      <input type="hidden" id="s-id"/>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Student No.*</label>
+          <input id="s-no" placeholder="2024-0001"/>
+        </div>
+        <div class="form-group">
+          <label>First Name*</label>
+          <input id="s-fname" placeholder="Juan"/>
+        </div>
+        <div class="form-group">
+          <label>Last Name*</label>
+          <input id="s-lname" placeholder="Dela Cruz"/>
+        </div>
+        <div class="form-group">
+          <label>Email*</label>
+          <input id="s-email" type="email" placeholder="juan@school.edu"/>
+        </div>
+        <div class="form-group">
+          <label>Birthdate</label>
+          <input id="s-bdate" type="date"/>
+        </div>
+        <div class="form-group">
+          <label>Department*</label>
+          <select id="s-dept"><option value="">— Select —</option></select>
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="s-status">
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+            <option value="Graduated">Graduated</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" onclick="saveStudent()">💾 Save Student</button>
+        <button class="btn btn-outline"  onclick="clearStudentForm()">✕ Clear</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title flex" style="justify-content:space-between">
+        <span>📋 Student List</span>
+        <button class="btn btn-outline btn-sm" onclick="loadStudents()">↻ Refresh</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th><th>Student No</th><th>Name</th>
+              <th>Email</th><th>Dept</th><th>Status</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="student-table"><tr><td colspan="7" class="text-muted" style="padding:20px;text-align:center">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ ENROLLMENTS TAB ═══════════════ -->
+  <div id="tab-enroll" class="hidden">
+
+    <div class="card">
+      <div class="card-title">📝 Enroll Student in Course</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Student*</label>
+          <select id="e-student"><option value="">— Select —</option></select>
+        </div>
+        <div class="form-group">
+          <label>Course*</label>
+          <select id="e-course"><option value="">— Select —</option></select>
+        </div>
+        <div class="form-group">
+          <label>Semester*</label>
+          <select id="e-sem">
+            <option value="1st">1st Semester</option>
+            <option value="2nd">2nd Semester</option>
+            <option value="Summer">Summer</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>School Year*</label>
+          <input id="e-sy" placeholder="2024-2025"/>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-success" onclick="enrollStudent()">✅ Enroll</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title flex" style="justify-content:space-between">
+        <span>📋 Enrollment Records</span>
+        <button class="btn btn-outline btn-sm" onclick="loadEnrollments()">↻ Refresh</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th><th>Student</th><th>Course</th>
+              <th>Semester</th><th>S.Y.</th><th>Enrolled At</th><th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="enroll-table"><tr><td colspan="7" class="text-muted" style="padding:20px;text-align:center">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ COURSES TAB ═══════════════ -->
+  <div id="tab-courses" class="hidden">
+    <div class="card">
+      <div class="card-title flex" style="justify-content:space-between">
+        <span>📚 Course List</span>
+        <button class="btn btn-outline btn-sm" onclick="loadCourses()">↻ Refresh</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>#</th><th>Code</th><th>Course Name</th><th>Units</th><th>Department</th></tr>
+          </thead>
+          <tbody id="course-table"><tr><td colspan="5" class="text-muted" style="padding:20px;text-align:center">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ AUDIT TAB ═══════════════ -->
+  <div id="tab-audit" class="hidden">
+    <div class="card">
+      <div class="card-title flex" style="justify-content:space-between">
+        <span>🗒️ Audit Log (latest 50)</span>
+        <button class="btn btn-outline btn-sm" onclick="loadAudit()">↻ Refresh</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>#</th><th>Action</th><th>Table</th><th>Record ID</th><th>Description</th><th>Timestamp</th></tr>
+          </thead>
+          <tbody id="audit-table"><tr><td colspan="6" class="text-muted" style="padding:20px;text-align:center">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<div id="toast"></div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
