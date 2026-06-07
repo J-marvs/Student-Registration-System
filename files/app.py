@@ -14,11 +14,14 @@ app = Flask(__name__)
 CORS(app)
 
 # ── Database config ────────────────────────────────────────────
+import os
+
 DB_CONFIG = {
-    "host":     "localhost",
-    "user":     "root",
-    "password": "root1234",
-    "database": "student_registration"
+    "host":     os.environ.get("MYSQLHOST", "localhost"),
+    "user":     os.environ.get("MYSQLUSER", "root"),
+    "password": os.environ.get("MYSQLPASSWORD", "root1234"),
+    "database": os.environ.get("MYSQLDATABASE", "student_registration"),
+    "port":     int(os.environ.get("MYSQLPORT", 3306))
 }
 
 def get_db():
@@ -227,4 +230,5 @@ def get_audit():
 # ══════════════════════════════════════════════════════════════
 
 if __name__ == "__main__":
-    app.run(debug=False, host='0.0.0.0', port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
