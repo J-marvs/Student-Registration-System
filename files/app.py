@@ -184,17 +184,19 @@ def enroll_student():
     conn = get_db()
     cur  = conn.cursor()
     try:
-        cur.callproc("sp_enroll_student", [
-            data["student_id"], data["course_id"],
-            data["semester"], data["school_year"], ""
-        ])
+        cur.execute("""
+            SELECT COUNT(*) as count FROM enrollments
+            WHERE student_id=%s AND course_id=%s AND semester=%s AND school_year=%s
+        """, (data["student_id"], data["course_id"], data["semester"], data["school_year"]))
+        result = cur.fetchone()
+        if result["count"] > 0:
+            return jsonify({"error": "Student is already enrolled in this course."}), 409
+        cur.execute("""
+            INSERT INTO enrollments (student_id, course_id, semester, school_year)
+            VALUES (%s, %s, %s, %s)
+        """, (data["student_id"], data["course_id"], data["semester"], data["school_year"]))
         conn.commit()
-        cur.execute("SELECT @_sp_enroll_student_4")
-        row = cur.fetchone()
-        msg = list(row.values())[0] if row else "Enrollment successful."
-        if "already" in (msg or ""):
-            return jsonify({"error": msg}), 409
-        return jsonify({"message": msg}), 201
+        return jsonify({"message": "Enrollment successful."}), 201
     finally:
         cur.close(); conn.close()
 
