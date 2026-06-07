@@ -3,22 +3,22 @@ Student Registration System - Flask Backend
 Run: python app.py
 Requires: pip install flask flask-cors pymysql
 """
-
+import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import pymysql
 import pymysql.cursors
 import re
-import os
 
 app = Flask(__name__)
 CORS(app)
 
-# ── Database config ────────────────────────────────────────────
+# ── Database config ───────────────────────────────────────────
+
 DB_CONFIG = {
     "host":     os.environ.get("MYSQLHOST", "mysql-sb7q.railway.internal"),
     "user":     os.environ.get("MYSQLUSER", "root"),
-    "password": os.environ.get("MYSQLPASSWORD", "lTiMIbKJHtHrxfpqqmCrkpPmeMmulJOK4"),
+    "password": os.environ.get("MYSQLPASSWORD", "lTiMIbKJHtHrxfpqqmCrkpPmeMmulJOK"),
     "database": os.environ.get("MYSQLDATABASE", "railway"),
     "port":     int(os.environ.get("MYSQLPORT", 3306))
 }
@@ -73,12 +73,6 @@ def add_student():
             data["department_id"]
         ))
         conn.commit()
-        # Log to audit
-        cur.execute("""
-            INSERT INTO audit_log (action, table_name, record_id, description)
-            VALUES ('INSERT', 'students', %s, %s)
-        """, (cur.lastrowid, f"New student registered: {data['first_name']} {data['last_name']} ({data['student_no']})"))
-        conn.commit()
         return jsonify({"message": "Student added", "id": cur.lastrowid}), 201
     except pymysql.IntegrityError as e:
         return jsonify({"error": str(e)}), 409
@@ -116,17 +110,8 @@ def update_student(sid):
 def delete_student(sid):
     conn = get_db()
     cur  = conn.cursor()
-    # Get student info for audit log
-    cur.execute("SELECT first_name, last_name, student_no FROM students WHERE student_id = %s", (sid,))
-    student = cur.fetchone()
     cur.execute("DELETE FROM students WHERE student_id = %s", (sid,))
     conn.commit()
-    if student:
-        cur.execute("""
-            INSERT INTO audit_log (action, table_name, record_id, description)
-            VALUES ('DELETE', 'students', %s, %s)
-        """, (sid, f"Student removed: {student['first_name']} {student['last_name']} ({student['student_no']})"))
-        conn.commit()
     cur.close(); conn.close()
     return jsonify({"message": "Student deleted"})
 
@@ -199,22 +184,17 @@ def enroll_student():
     conn = get_db()
     cur  = conn.cursor()
     try:
-        # Check if already enrolled
-        cur.execute("""
-            SELECT COUNT(*) as count FROM enrollments
-            WHERE student_id = %s AND course_id = %s
-            AND semester = %s AND school_year = %s
-        """, (data["student_id"], data["course_id"], data["semester"], data["school_year"]))
-        result = cur.fetchone()
-        if result["count"] > 0:
-            return jsonify({"error": "Student is already enrolled in this course."}), 409
-        # Insert enrollment
-        cur.execute("""
-            INSERT INTO enrollments (student_id, course_id, semester, school_year)
-            VALUES (%s, %s, %s, %s)
-        """, (data["student_id"], data["course_id"], data["semester"], data["school_year"]))
+        cur.callproc("sp_enroll_student", [
+            data["student_id"], data["course_id"],
+            data["semester"], data["school_year"], ""
+        ])
         conn.commit()
-        return jsonify({"message": "Enrollment successful."}), 201
+        cur.execute("SELECT @_sp_enroll_student_4")
+        row = cur.fetchone()
+        msg = list(row.values())[0] if row else "Enrollment successful."
+        if "already" in (msg or ""):
+            return jsonify({"error": msg}), 409
+        return jsonify({"message": msg}), 201
     finally:
         cur.close(); conn.close()
 
