@@ -1,5 +1,5 @@
 // ── Config ────────────────────────────────────────────────────
-const API = "https://student-registration-system-production-8afb.up.railway.app/";
+const API = "https://student-registration-system-production-8afb.up.railway.app";
 
 // ── Toast ─────────────────────────────────────────────────────
 let toastTimer;
