@@ -16,9 +16,9 @@ CORS(app)
 # ── Database config ───────────────────────────────────────────
 
 DB_CONFIG = {
-    "host":     os.environ.get("MYSQLHOST", "mysql.railway.internal"),
+    "host":     os.environ.get("MYSQLHOST", "mysql-sb7q.railway.internal"),
     "user":     os.environ.get("MYSQLUSER", "root"),
-    "password": os.environ.get("MYSQLPASSWORD", "wnWGhehkFnqTMrPsOBYBuWZgpuQXuKZv"),
+    "password": os.environ.get("MYSQLPASSWORD", "lTiMIbKJHtHrxfpqqmCrkpPmeMmulJOK"),
     "database": os.environ.get("MYSQLDATABASE", "railway"),
     "port":     int(os.environ.get("MYSQLPORT", 3306))
 }
