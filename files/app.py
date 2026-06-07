@@ -3,7 +3,7 @@ Student Registration System - Flask Backend
 Run: python app.py
 Requires: pip install flask flask-cors pymysql
 """
-
+import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import pymysql
@@ -13,8 +13,7 @@ import re
 app = Flask(__name__)
 CORS(app)
 
-# ── Database config ────────────────────────────────────────────
-import os
+# ── Database config ───────────────────────────────────────────
 
 DB_CONFIG = {
     "host":     os.environ.get("MYSQLHOST", "mysql.railway.internal"),
